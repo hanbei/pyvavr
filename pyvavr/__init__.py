@@ -1,0 +1,2 @@
+class ValueException(Exception):
+    pass
