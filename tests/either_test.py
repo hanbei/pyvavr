@@ -1,8 +1,8 @@
-from pyvavr.either import Either
+from pyvavr.either import Either, Right, Left
 
 
 def test_left_creation():
-    either = Either.left("Some")
+    either = Left("Some")
 
     assert either != None
     assert either.is_left() == True
@@ -12,7 +12,7 @@ def test_left_creation():
 
 
 def test_right_creation():
-    either = Either.right("Some")
+    either = Right("Some")
 
     assert either != None
     assert either.is_left() == False
@@ -22,7 +22,7 @@ def test_right_creation():
 
 
 def test_map_on_right_either_applies_function():
-    either = Either.right("Some").map(lambda x: x + " More")
+    either = Right("Some").map(lambda x: x + " More")
 
     assert either != None
     assert either.is_left() == False
@@ -31,7 +31,7 @@ def test_map_on_right_either_applies_function():
     assert either._right == "Some More"
 
 def test_map_on_left_either_does_nothing():
-    either = Either.left("Some").map(lambda x: x + " More")
+    either = Left("Some").map(lambda x: x + " More")
 
     assert either != None
     assert either.is_left() == True
@@ -40,7 +40,7 @@ def test_map_on_left_either_does_nothing():
     assert either._right == None
 
 def test_map_left_on_right_either_does_nothing():
-    either = Either.right("Some").map_left(lambda x: x + " More")
+    either = Right("Some").map_left(lambda x: x + " More")
 
     assert either != None
     assert either.is_left() == False
@@ -49,7 +49,7 @@ def test_map_left_on_right_either_does_nothing():
     assert either._right == "Some"
 
 def test_map_left_on_left_either_applies_function():
-    either = Either.left("Some").map_left(lambda x: x + " More")
+    either = Left("Some").map_left(lambda x: x + " More")
 
     assert either != None
     assert either.is_left() == True

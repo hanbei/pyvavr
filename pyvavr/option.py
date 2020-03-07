@@ -7,28 +7,19 @@ U = TypeVar("U")
 T = TypeVar("T")
 
 
-class Option(Generic[U]):
+class Option(ABC, Generic[U]):
 
-    @classmethod
-    def of(cls, value: U) -> 'Option[U]':
-        if (value == None):
-            return Option(None)
-        return Option(value)
-
-    @classmethod
-    def empty(cls) -> 'Option[U]':
-        return Option(None)
-
-    def __init__(self, value=None):
+    def __init__(self):
         super().__init__()
-        self._value = value
+        self._value = None
 
     @property
     def value(self):
         return self.get()
 
+    @abstractmethod
     def is_empty(self):
-        return self._value == None
+        pass
 
     def is_present(self) -> bool:
         return not self.is_empty()
@@ -37,13 +28,11 @@ class Option(Generic[U]):
         if (self.is_empty()):
             return self
         else:
-            return Option.of(function(self._value))
+            return Just(function(self._value))
 
+    @abstractmethod
     def get(self) -> T:
-        if (self.is_empty()):
-            raise ValueException()
-        else:
-            return self._value
+        pass
 
     def or_else(self, alternative: Union[T, Callable[[], T]]) -> T:
         if self.is_empty():
@@ -54,8 +43,34 @@ class Option(Generic[U]):
         else:
             return self.get()
 
-    #    def __eq__(self, o: 'Option[T]') -> bool:
-    #        return self._value == o._value
-
     def __repr__(self) -> str:
         return "Option(" + self._value + ")"
+
+
+class Just(Option):
+
+    def __init__(self, value):
+        super().__init__()
+        if value:
+            self._value = value
+        else:
+            raise ValueException("Just may not be None")
+
+    def is_empty(self):
+        return False
+
+    def get(self) -> T:
+        return self._value
+
+
+class Nothing(Option):
+
+    def __init__(self):
+        super().__init__()
+        self._value = None
+
+    def is_empty(self):
+        return True
+
+    def get(self) -> T:
+        raise ValueException()

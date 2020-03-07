@@ -13,14 +13,6 @@ class Either(ABC, Generic[LEFT, RIGHT]):
         self._left = None
         self._right = None
 
-    @classmethod
-    def left(cls: 'Either', left: LEFT) -> 'LeftEither':
-        return LeftEither(left)
-
-    @classmethod
-    def right(cls: 'Either', right: RIGHT) -> 'RightEither':
-        return RightEither(right)
-
     @abstractmethod
     def is_left(self):
         pass
@@ -31,18 +23,18 @@ class Either(ABC, Generic[LEFT, RIGHT]):
 
     def map(self, function: Callable[[RIGHT], U]) -> 'Either[LEFT, U]':
         if (self.is_right()):
-            return Either.right(function(self._right))
+            return Right(function(self._right))
         else:
             return self
 
     def map_left(self, function: Callable[[LEFT], U]) -> 'Either[U, RIGHT]':
         if (self.is_left()):
-            return Either.left(function(self._left))
+            return Left(function(self._left))
         else:
             return self
 
 
-class LeftEither(Either):
+class Left(Either):
 
     def __init__(self, left: LEFT):
         super().__init__()
@@ -55,7 +47,7 @@ class LeftEither(Either):
         return False
 
 
-class RightEither(Either):
+class Right(Either):
 
     def __init__(self, right: RIGHT):
         super().__init__()
