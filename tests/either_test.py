@@ -1,3 +1,6 @@
+import pytest
+
+from pyvavr import ValueException
 from pyvavr.either import Either, Right, Left
 
 
@@ -7,8 +10,7 @@ def test_left_creation():
     assert either != None
     assert either.is_left() == True
     assert either.is_right() == False
-    assert either._left == "Some"
-    assert either._right == None
+    assert either.left == "Some"
 
 
 def test_right_creation():
@@ -17,8 +19,7 @@ def test_right_creation():
     assert either != None
     assert either.is_left() == False
     assert either.is_right() == True
-    assert either._left == None
-    assert either._right == "Some"
+    assert either.right == "Some"
 
 
 def test_map_on_right_either_applies_function():
@@ -27,8 +28,8 @@ def test_map_on_right_either_applies_function():
     assert either != None
     assert either.is_left() == False
     assert either.is_right() == True
-    assert either._left == None
-    assert either._right == "Some More"
+    assert either.right == "Some More"
+
 
 def test_map_on_left_either_does_nothing():
     either = Left("Some").map(lambda x: x + " More")
@@ -36,8 +37,8 @@ def test_map_on_left_either_does_nothing():
     assert either != None
     assert either.is_left() == True
     assert either.is_right() == False
-    assert either._left == "Some"
-    assert either._right == None
+    assert either.left == "Some"
+
 
 def test_map_left_on_right_either_does_nothing():
     either = Right("Some").map_left(lambda x: x + " More")
@@ -45,8 +46,8 @@ def test_map_left_on_right_either_does_nothing():
     assert either != None
     assert either.is_left() == False
     assert either.is_right() == True
-    assert either._left == None
-    assert either._right == "Some"
+    assert either.right == "Some"
+
 
 def test_map_left_on_left_either_applies_function():
     either = Left("Some").map_left(lambda x: x + " More")
@@ -54,5 +55,14 @@ def test_map_left_on_left_either_applies_function():
     assert either != None
     assert either.is_left() == True
     assert either.is_right() == False
-    assert either._left == "Some More"
-    assert either._right == None
+    assert either.left == "Some More"
+
+
+def test_left_get_on_right_raises():
+    with pytest.raises(ValueException):
+        var = Right("Some").left
+
+
+def test_right_get_on_left_raises():
+    with pytest.raises(ValueException):
+        var = Left("Some").right

@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar, Callable
 
+from pyvavr import ValueException
+
 LEFT = TypeVar("LEFT")
 RIGHT = TypeVar("RIGHT")
 U = TypeVar("U")
@@ -10,8 +12,6 @@ class Either(ABC, Generic[LEFT, RIGHT]):
 
     def __init__(self):
         super().__init__()
-        self._left = None
-        self._right = None
 
     @abstractmethod
     def is_left(self):
@@ -21,15 +21,24 @@ class Either(ABC, Generic[LEFT, RIGHT]):
     def is_right(self):
         pass
 
+    @abstractmethod
+    def right(self) -> RIGHT:
+        pass
+
+    @abstractmethod
+    def left(self) -> LEFT:
+        pass
+
+
     def map(self, function: Callable[[RIGHT], U]) -> 'Either[LEFT, U]':
         if (self.is_right()):
-            return Right(function(self._right))
+            return Right(function(self.right))
         else:
             return self
 
     def map_left(self, function: Callable[[LEFT], U]) -> 'Either[U, RIGHT]':
         if (self.is_left()):
-            return Left(function(self._left))
+            return Left(function(self.left))
         else:
             return self
 
@@ -46,6 +55,13 @@ class Left(Either):
     def is_right(self):
         return False
 
+    @property
+    def right(self) -> RIGHT:
+        raise ValueException("Not a right value")
+
+    @property
+    def left(self) -> LEFT:
+        return self._left
 
 class Right(Either):
 
@@ -58,3 +74,11 @@ class Right(Either):
 
     def is_left(self):
         return False
+
+    @property
+    def right(self) -> RIGHT:
+        return self._right
+
+    @property
+    def left(self) -> LEFT:
+        raise ValueException("Not a left value")
