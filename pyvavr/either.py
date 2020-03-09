@@ -29,7 +29,6 @@ class Either(ABC, Generic[LEFT, RIGHT]):
     def left(self) -> LEFT:
         pass
 
-
     def map(self, function: Callable[[RIGHT], U]) -> 'Either[LEFT, U]':
         if (self.is_right()):
             return Right(function(self.right))
@@ -62,6 +61,7 @@ class Left(Either):
     @property
     def left(self) -> LEFT:
         return self._left
+
 
 class Right(Either):
 

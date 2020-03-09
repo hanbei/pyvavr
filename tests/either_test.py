@@ -1,7 +1,7 @@
 import pytest
 
 from pyvavr import ValueException
-from pyvavr.either import Either, Right, Left
+from pyvavr.either import Right, Left
 
 
 def test_left_creation():

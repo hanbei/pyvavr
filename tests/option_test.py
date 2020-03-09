@@ -1,7 +1,7 @@
 import pytest
 
 from pyvavr import ValueException
-from pyvavr.option import Option, Just, Nothing
+from pyvavr.option import Just, Nothing
 
 
 def test_empty_option():
@@ -11,19 +11,19 @@ def test_empty_option():
     assert option.is_present() == False
 
 
-def test_some_option():
+def test_just_option():
     option = Just("Some")
 
     assert option.is_empty() == False
     assert option.is_present() == True
 
 
-def test_some_with_none_raises():
+def test_just_with_none_raises():
     with pytest.raises(ValueException):
         Just(None)
 
 
-def test_map_on_some_applies_function():
+def test_map_on_just_applies_function():
     option = Just("Some").map(lambda x: x + " More")
 
     assert option
@@ -40,7 +40,7 @@ def test_map_on_empty_does_nothing():
     assert option.is_present() == False
 
 
-def test_get_on_some_returns_value():
+def test_get_on_just_returns_value():
     value = Just("Some").get()
 
     assert value == "Some"
