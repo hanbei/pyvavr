@@ -39,6 +39,23 @@ def test_map_on_left_either_does_nothing():
     assert either.is_right() == False
     assert either.left == "Some"
 
+def test_flat_map_on_right_either_applies_function():
+    either = Right("Some").flat_map(lambda x: Right(x + " More"))
+
+    assert either != None
+    assert either.is_left() == False
+    assert either.is_right() == True
+    assert either.right == "Some More"
+
+
+def test_flat_map_on_left_either_does_nothing():
+    either = Left("Some").flat_map(lambda x: Right(x + " More"))
+
+    assert either != None
+    assert either.is_left() == True
+    assert either.is_right() == False
+    assert either.left == "Some"
+
 
 def test_map_left_on_right_either_does_nothing():
     either = Right("Some").map_left(lambda x: x + " More")

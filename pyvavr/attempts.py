@@ -29,6 +29,10 @@ class Try(ABC, Generic[T, E]):
         pass
 
     @abstractmethod
+    def flat_map(self, function: Callable[[T], 'Try[R]']) -> 'Try[R]':
+        pass
+
+    @abstractmethod
     def get(self) -> T:
         pass
 
@@ -38,6 +42,10 @@ class Try(ABC, Generic[T, E]):
 
     @abstractmethod
     def or_else(self, alternative: Union[T, Callable[[], T]]) -> T:
+        pass
+
+    @abstractmethod
+    def or_else_raise(self, alternative: Union[T, Callable[[], Exception]]) -> T:
         pass
 
     @abstractmethod
@@ -66,9 +74,18 @@ class Success(Try):
     def or_else(self, alternative: Union[T, Callable[[], T]]) -> T:
         return self._result
 
+    def or_else_raise(self, alternative: Union[T, Callable[[], Exception]]) -> T:
+        return self._result
+
     def map(self, function: Callable[[T], R]) -> 'Try[R]':
         try:
             return Success(function(self._result))
+        except Exception as e:
+            return Failure(e)
+
+    def flat_map(self, function: Callable[[T], 'Try[R]']) -> 'Try[R]':
+        try:
+            return function(self._result)
         except Exception as e:
             return Failure(e)
 
@@ -91,8 +108,17 @@ class Failure(Try):
     def map(self, function: Callable[[T], R]) -> 'Try[R]':
         return self
 
+    def flat_map(self, function: Callable[[T], 'Try[R]']) -> 'Try[R]':
+        return self
+
     def or_else(self, alternative: Union[T, Callable[[], T]]) -> T:
         if callable(alternative):
             return alternative()
         else:
             return alternative
+
+    def or_else_raise(self, alternative: Union[T, Callable[[], Exception]]) -> T:
+        if callable(alternative):
+            raise alternative()
+        else:
+            raise alternative

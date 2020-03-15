@@ -35,6 +35,12 @@ class Either(ABC, Generic[LEFT, RIGHT]):
         else:
             return self
 
+    def flat_map(self, function: Callable[[RIGHT], 'Either[U]']) -> 'Either[LEFT, U]':
+        if (self.is_right()):
+            return function(self.right)
+        else:
+            return self
+
     def map_left(self, function: Callable[[LEFT], U]) -> 'Either[U, RIGHT]':
         if (self.is_left()):
             return Left(function(self.left))
