@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "pyvavr"
+version = "0.1.0"
+description = "Try to reimplement vavr for python."
+authors = ["Florian Schulz <florian.schulz@hanbei.de>"]
+
+[tool.poetry.dependencies]
+python = "> 3.6"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.4.1"
+tox = "3.14.5"
+pytest-cov = "^2.8.1"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
+
+

@@ -1,6 +1,8 @@
-venv
+.venv
 .idea
 .tox
 .pytest_cache
 pyvavr.egg-info
 **/__pycache__
+.coverage
+htmlcov
