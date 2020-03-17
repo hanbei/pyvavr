@@ -6,6 +6,7 @@ authors = ["Florian Schulz <florian.schulz@hanbei.de>"]
 
 [tool.poetry.dependencies]
 python = "> 3.6"
+mutmut = "^1.8.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.4.1"

@@ -6,3 +6,4 @@ pyvavr.egg-info
 **/__pycache__
 .coverage
 htmlcov
+.mutmut-cache
