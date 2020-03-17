@@ -3,9 +3,9 @@ from typing import TypeVar, Generic, Callable, Union
 
 from pyvavr import ValueException
 
-R = TypeVar("R")
-T = TypeVar("T")
-E = TypeVar("E")
+R = TypeVar("R")  # pragma: no mutate
+T = TypeVar("T")  # pragma: no mutate
+E = TypeVar("E")  # pragma: no mutate
 
 
 class Try(ABC, Generic[T, E]):
@@ -16,39 +16,39 @@ class Try(ABC, Generic[T, E]):
         except Exception as e:
             self._exception = e
 
-    @classmethod
+    @classmethod # pragma: no mutate
     def success(cls, result):
         return Success(result)
 
-    @classmethod
+    @classmethod # pragma: no mutate
     def failure(cls, exception):
         return Failure(exception)
 
-    @abstractmethod
+    @abstractmethod # pragma: no mutate
     def map(self, function: Callable[[T], R]) -> 'Try[R]':
         pass
 
-    @abstractmethod
+    @abstractmethod # pragma: no mutate
     def flat_map(self, function: Callable[[T], 'Try[R]']) -> 'Try[R]':
         pass
 
-    @abstractmethod
+    @abstractmethod # pragma: no mutate
     def get(self) -> T:
         pass
 
-    @abstractmethod
+    @abstractmethod # pragma: no mutate
     def get_error(self) -> E:
         pass
 
-    @abstractmethod
+    @abstractmethod # pragma: no mutate
     def or_else(self, alternative: Union[T, Callable[[], T]]) -> T:
         pass
 
-    @abstractmethod
+    @abstractmethod # pragma: no mutate
     def or_else_raise(self, alternative: Union[T, Callable[[], Exception]]) -> T:
         pass
 
-    @abstractmethod
+    @abstractmethod # pragma: no mutate
     def is_success(self) -> bool:
         pass
 

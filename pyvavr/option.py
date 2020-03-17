@@ -3,8 +3,8 @@ from typing import TypeVar, Generic, Callable, Union
 
 from pyvavr import ValueException
 
-U = TypeVar("U")
-T = TypeVar("T")
+U = TypeVar("U")  # pragma: no mutate
+T = TypeVar("T")  # pragma: no mutate
 
 
 class Option(ABC, Generic[T]):
@@ -17,30 +17,30 @@ class Option(ABC, Generic[T]):
     def value(self) -> T:
         return self.get()
 
-    @abstractmethod
+    @abstractmethod # pragma: no mutate
     def is_empty(self) -> bool:
         pass
 
     def is_present(self) -> bool:
         return not self.is_empty()
 
-    @abstractmethod
+    @abstractmethod # pragma: no mutate
     def map(self, function: Callable[[T], U]) -> 'Option[U]':
         pass
 
-    @abstractmethod
+    @abstractmethod # pragma: no mutate
     def flat_map(self, function: Callable[[T], 'Option[U]']) -> 'Option[U]':
         pass
 
-    @abstractmethod
+    @abstractmethod # pragma: no mutate
     def get(self) -> T:
         pass
 
-    @abstractmethod
+    @abstractmethod # pragma: no mutate
     def or_else(self, alternative: Union[T, Callable[[], T]]) -> T:
         pass
 
-    @abstractmethod
+    @abstractmethod # pragma: no mutate
     def or_else_raise(self, alternative: Union[T, Callable[[], Exception]]) -> T:
         pass
 
