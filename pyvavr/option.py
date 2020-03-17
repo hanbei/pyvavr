@@ -9,9 +9,9 @@ T = TypeVar("T")  # pragma: no mutate
 
 class Option(ABC, Generic[T]):
 
-    def __init__(self):
+    def __init__(self, value):
         super().__init__()
-        self._value = None
+        self._value = value
 
     @property
     def value(self) -> T:
@@ -51,7 +51,7 @@ class Option(ABC, Generic[T]):
 class Just(Option):
 
     def __init__(self, value):
-        super().__init__()
+        super().__init__(value)
         if value:
             self._value = value
         else:
@@ -79,8 +79,7 @@ class Just(Option):
 class Nothing(Option):
 
     def __init__(self):
-        super().__init__()
-        self._value = None
+        super().__init__(None)
 
     def is_empty(self):
         return True
