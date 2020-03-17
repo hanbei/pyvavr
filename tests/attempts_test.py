@@ -25,6 +25,7 @@ def test_success_is_not_failure(successful_try):
 def test_map_success(successful_try):
     assert successful_try.map(lambda x: x + " Bla").get() == "Some Bla"
 
+
 def test_flat_map_success(successful_try):
     assert successful_try.flat_map(lambda x: Try.success(x + " Bla")).get() == "Some Bla"
 
@@ -92,6 +93,7 @@ def test_or_else_raise_failed(failed_try):
 def test_or_else_raise_success(successful_try):
     assert successful_try.or_else_raise("Other") == "Some"
 
+
 def test_or_else_raise_failed_with_callable(failed_try):
     with pytest.raises(NotImplementedError):
         failed_try.or_else_raise(raise_something)
@@ -107,6 +109,7 @@ def test_success_is_success(successful_try):
 
 def test_failure_is_not_success(failed_try):
     assert failed_try.is_success() == False
+
 
 def raise_something():
     raise NotImplementedError
