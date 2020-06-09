@@ -1,9 +1,16 @@
 language: python
 python:
-    - "3.6"
-    - "3.7"
-    - "3.8"
+  - "3.6"
+  - "3.7"
+  - "3.8"
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
 install:
-    - pip install tox-travis
-    - pip install poetry
-script: tox
+  - pip install tox-travis
+  - pip install poetry
+script:
+  - tox
+after_script:
+  - ./cc-test-reporter after-build .coverage
