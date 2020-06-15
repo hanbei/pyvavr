@@ -13,19 +13,19 @@ class Either(ABC, Generic[LEFT, RIGHT]):
     def __init__(self):
         super().__init__()
 
-    @abstractmethod # pragma: no mutate
+    @abstractmethod  # pragma: no mutate
     def is_left(self):
         pass
 
-    @abstractmethod # pragma: no mutate
+    @abstractmethod  # pragma: no mutate
     def is_right(self):
         pass
 
-    @abstractmethod # pragma: no mutate
+    @abstractmethod  # pragma: no mutate
     def right(self) -> RIGHT:
         pass
 
-    @abstractmethod # pragma: no mutate
+    @abstractmethod  # pragma: no mutate
     def left(self) -> LEFT:
         pass
 
