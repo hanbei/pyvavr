@@ -8,6 +8,7 @@ from pyvavr.option import Just, Nothing
 def nothing():
     return Nothing()
 
+
 @pytest.fixture()
 def just():
     return Just("Some")
@@ -44,6 +45,7 @@ def test_map_on_empty_does_nothing(nothing):
     assert option.is_empty() == True
     assert option.is_present() == False
 
+
 def test_flat_map_on_just_applies_function(just):
     option = just.flat_map(lambda x: Just(x + " More"))
 
@@ -59,7 +61,6 @@ def test_flat_map_on_empty_does_nothing(nothing):
     assert option != None
     assert option.is_empty() == True
     assert option.is_present() == False
-
 
 
 def test_get_on_just_returns_value(just):
@@ -80,12 +81,14 @@ def test_nothing_or_else_with_value(nothing):
 def test_nothing_or_else_with_callable(nothing):
     assert nothing.or_else(lambda: "Alternative2") == "Alternative2"
 
+
 def test_just_or_else_with_value(just):
     assert just.or_else("Alternative") == "Some"
 
 
 def test_just_or_else_with_callable(just):
     assert just.or_else(lambda: "Alternative2") == "Some"
+
 
 def test_access_property(just):
     assert just.value == "Some"
@@ -104,6 +107,7 @@ def test_nothing_or_else_raise_with_value(nothing):
 def test_nothing_or_else_raise_with_callable(nothing):
     with pytest.raises(ValueException):
         nothing.or_else_raise(raise_something)
+
 
 def test_just_or_else_raise_with_value(just):
     assert just.or_else_raise(ValueException("Bäm")) == "Some"

@@ -110,3 +110,27 @@ def test_filter_valid_does_not_match(valid):
     filtered = valid.filter(lambda x: x == "Bla")
 
     assert filtered.is_present() == False
+
+
+def test_valid_or_else_is_same(valid):
+    or_else = valid.or_else(Valid("alternative"))
+
+    assert or_else == valid
+
+
+def test_invalid_or_else_is_alternative(invalid):
+    or_else = invalid.or_else(Valid("alternative"))
+
+    assert or_else == Valid("alternative")
+
+
+def test_valid_or_else_is_same_callable(valid):
+    or_else = valid.or_else(lambda: Valid("alternative"))
+
+    assert or_else == valid
+
+
+def test_invalid_or_else_is_alternative_callable(invalid):
+    or_else = invalid.or_else(lambda: Valid("alternative"))
+
+    assert or_else == Valid("alternative")

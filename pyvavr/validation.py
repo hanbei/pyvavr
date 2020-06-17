@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic, Callable
+from typing import TypeVar, Generic, Callable, Union
 
 from pyvavr import ValueException
 from pyvavr.option import Just, Nothing, Option
@@ -60,6 +60,10 @@ class Validation(ABC, Generic[E, T]):
         else:
             return Nothing()
 
+    @abstractmethod
+    def or_else(self, alternative: Union['Validation[E, T]', Callable[[], 'Validation[E, T]']]) -> 'Validation[E, T]':
+        pass
+
 
 class Valid(Validation):
     def __init__(self, value: T):
@@ -75,7 +79,16 @@ class Valid(Validation):
         return self.value
 
     def get_error(self) -> E:
-        raise ValueException("error of 'valid' Validation");
+        raise ValueException("error of 'valid' Validation")
+
+    def or_else(self, alternative: Union['Validation[E, T]', Callable[[], 'Validation[E, T]']]) -> 'Validation[E, T]':
+        return self
+
+    def __eq__(self, o: Validation[E, T]) -> bool:
+        if o.invalid():
+            return False
+        else:
+            return self.value == o.get()
 
 
 class Invalid(Validation):
@@ -93,3 +106,15 @@ class Invalid(Validation):
 
     def get_error(self) -> E:
         return self.error
+
+    def or_else(self, alternative: Union['Validation[E, T]', Callable[[], 'Validation[E, T]']]) -> 'Validation[E, T]':
+        if callable(alternative):
+            return alternative()
+        else:
+            return alternative
+
+    def __eq__(self, o: Validation[E, T]) -> bool:
+        if o.valid():
+            return False
+        else:
+            return self.error == o.get_error()
