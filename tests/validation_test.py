@@ -46,3 +46,67 @@ def test_valid_get_error_raises(valid):
 def test_invalid_get_raises(invalid):
     with pytest.raises(ValueException):
         invalid.get()
+
+
+def test_swap_invalid(invalid):
+    swapped = invalid.swap()
+    assert swapped.valid()
+    assert swapped.get() == "Error"
+
+
+def test_swap_valid(valid):
+    swapped = valid.swap()
+    assert swapped.invalid()
+    assert swapped.get_error() == "Some"
+
+
+def test_map_on_valid_applies_function(valid):
+    validation = valid.map(lambda x: x + " More")
+
+    assert validation
+    assert validation.valid() == True
+    assert validation.get() == "Some More"
+
+
+def test_map_on_invalid_does_nothing(invalid):
+    validation = invalid.map(lambda x: x + " More")
+
+    assert validation
+    assert validation.invalid() == True
+    assert validation.get_error() == "Error"
+
+
+def test_bimap_on_valid_applies_valid_function(valid):
+    validation = valid.bimap(lambda x: x + " More", lambda x: x + " Error")
+
+    assert validation
+    assert validation.valid() == True
+    assert validation.get() == "Some More"
+
+
+def test_bimap_on_invalid_applies_invalid_function(invalid):
+    validation = invalid.bimap(lambda x: x + " More", lambda x: x + " Error")
+
+    assert validation
+    assert validation.invalid() == True
+    assert validation.get_error() == "Error Error"
+
+
+def test_filter_invalid_is_somethig(invalid):
+    filtered = invalid.filter(lambda x: x == "Some")
+
+    assert filtered.is_empty() == False
+    assert filtered.get() == invalid
+
+
+def test_filter_valid_matches(valid):
+    filtered = valid.filter(lambda x: x == "Some")
+
+    assert filtered.is_present() == True
+    assert filtered.get() == valid
+
+
+def test_filter_valid_does_not_match(valid):
+    filtered = valid.filter(lambda x: x == "Bla")
+
+    assert filtered.is_present() == False
