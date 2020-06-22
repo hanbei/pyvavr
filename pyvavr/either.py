@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar, Callable
 
-from pyvavr import ValueException
+from pyvavr.exceptions import ValueException
 
 LEFT = TypeVar("LEFT")  # pragma: no mutate
 RIGHT = TypeVar("RIGHT")  # pragma: no mutate
