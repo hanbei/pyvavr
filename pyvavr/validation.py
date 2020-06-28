@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic, Callable, Union
+from typing import TypeVar, Generic, Callable, Union, List
 
-from pyvavr import ValueException
+from pyvavr import ValueException, curry
 from pyvavr.option import Just, Nothing, Option
 
 E = TypeVar("E")  # pragma: no mutate
@@ -26,6 +26,10 @@ class Validation(ABC, Generic[E, T]):
 
     @abstractmethod
     def get_error(self) -> E:
+        pass
+
+    @abstractmethod
+    def or_else(self, alternative: Union['Validation[E, T]', Callable[[], 'Validation[E, T]']]) -> 'Validation[E, T]':
         pass
 
     def swap(self) -> 'Validation[T, E]':
@@ -60,9 +64,32 @@ class Validation(ABC, Generic[E, T]):
         else:
             return Nothing()
 
-    @abstractmethod
-    def or_else(self, alternative: Union['Validation[E, T]', Callable[[], 'Validation[E, T]']]) -> 'Validation[E, T]':
-        pass
+    def fold(self, ifValid: Callable[[T], U], ifInvalid: Callable[[E], U]) -> U:
+        if self.valid():
+            return ifValid(self.get())
+        else:
+            return ifInvalid(self.get_error())
+
+    def ap(self, validation: 'Validation[List[E], Callable[[T], U]]'):
+        if self.valid():
+            if validation.valid():
+                f = validation.get()
+                u = f(self.get())
+                return Valid(u)
+            else:
+                errors = validation.get_error()
+                return Invalid(errors)
+        else:
+            if validation.valid():
+                error = self.get_error()
+                return Invalid([error])
+            else:
+                errors = validation.get_error()
+                error = self.get_error()
+                return Invalid(errors.append(error))
+
+    def combine(self, v1: 'Validation[E, T]') -> 'ValidationBuilder':
+        return ValidationBuilder(self, v1)
 
 
 class Valid(Validation):
@@ -92,7 +119,7 @@ class Valid(Validation):
 
 
 class Invalid(Validation):
-    def __init__(self, error: E):
+    def __init__(self, error: E) -> None:
         self.error = error
 
     def valid(self) -> bool:
@@ -118,3 +145,28 @@ class Invalid(Validation):
             return False
         else:
             return self.error == o.get_error()
+
+
+class ValidationBuilder(Generic[E, T, U]):
+    def __init__(self, *validations: Validation[E, T]) -> None:
+        super().__init__()
+        self.validations = list(validations)
+
+    def combine(self, validation: Validation[E, T]):
+        self.validations.append(validation)
+
+    def ap(self, func: Callable):
+        if len(self.validations) < 1:
+            raise ValueException(message = "expected at least one validation")
+
+        first_validation = self.validations[:][0]
+        current_validation = first_validation.ap(Valid(curry(func)))
+
+        for validation in self.validations[:][1:]:
+            current_validation = validation.ap(current_validation)
+
+        return current_validation
+
+
+def combine(v1: Validation[E, T], v2: Validation[E, U]) -> ValidationBuilder:
+    return ValidationBuilder(v1, v2)

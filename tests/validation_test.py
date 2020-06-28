@@ -15,19 +15,19 @@ def invalid():
 
 
 def test_valid_is_valid(valid):
-    assert valid.valid() == True
+    assert valid.valid() is True
 
 
 def test_valid_is_not_invalid(valid):
-    assert valid.invalid() == False
+    assert valid.invalid() is False
 
 
 def test_invalid_is_invalid(invalid):
-    assert invalid.invalid() == True
+    assert invalid.invalid() is True
 
 
 def test_invalid_is_not_valid(invalid):
-    assert invalid.valid() == False
+    assert invalid.valid() is False
 
 
 def test_valid_get_returns_value(valid):
@@ -64,7 +64,7 @@ def test_map_on_valid_applies_function(valid):
     validation = valid.map(lambda x: x + " More")
 
     assert validation
-    assert validation.valid() == True
+    assert validation.valid() is True
     assert validation.get() == "Some More"
 
 
@@ -72,7 +72,7 @@ def test_map_on_invalid_does_nothing(invalid):
     validation = invalid.map(lambda x: x + " More")
 
     assert validation
-    assert validation.invalid() == True
+    assert validation.invalid() is True
     assert validation.get_error() == "Error"
 
 
@@ -80,7 +80,7 @@ def test_bimap_on_valid_applies_valid_function(valid):
     validation = valid.bimap(lambda x: x + " More", lambda x: x + " Error")
 
     assert validation
-    assert validation.valid() == True
+    assert validation.valid() is True
     assert validation.get() == "Some More"
 
 
@@ -88,28 +88,28 @@ def test_bimap_on_invalid_applies_invalid_function(invalid):
     validation = invalid.bimap(lambda x: x + " More", lambda x: x + " Error")
 
     assert validation
-    assert validation.invalid() == True
+    assert validation.invalid() is True
     assert validation.get_error() == "Error Error"
 
 
 def test_filter_invalid_is_somethig(invalid):
     filtered = invalid.filter(lambda x: x == "Some")
 
-    assert filtered.is_empty() == False
+    assert filtered.is_empty() is False
     assert filtered.get() == invalid
 
 
 def test_filter_valid_matches(valid):
     filtered = valid.filter(lambda x: x == "Some")
 
-    assert filtered.is_present() == True
+    assert filtered.is_present() is True
     assert filtered.get() == valid
 
 
 def test_filter_valid_does_not_match(valid):
     filtered = valid.filter(lambda x: x == "Bla")
 
-    assert filtered.is_present() == False
+    assert filtered.is_present() is False
 
 
 def test_valid_or_else_is_same(valid):
@@ -134,3 +134,30 @@ def test_invalid_or_else_is_alternative_callable(invalid):
     or_else = invalid.or_else(lambda: Valid("alternative"))
 
     assert or_else == Valid("alternative")
+
+
+def test_fold_valid(valid):
+    assert valid.fold(lambda x: x + "Some", lambda x: x + "Erro") == "SomeSome"
+
+
+def test_fold_invalid(invalid):
+    assert invalid.fold(lambda x: x + "Some", lambda x: x + "Erro") == "ErrorErro"
+
+
+class TestValidation(object):
+    def __init__(self, value1, value2):
+        self.value1 = value1
+        self.value2 = value2
+
+
+def create_validation(value1, value2):
+    return TestValidation(value1, value2)
+
+
+def test_ap(valid):
+    ap = valid.combine(Valid(1)).ap(create_validation)
+
+    assert ap
+    assert isinstance(ap.get(), TestValidation)
+    assert ap.get().value1 == "Some"
+    assert ap.get().value2 == 1
