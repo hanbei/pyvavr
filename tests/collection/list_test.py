@@ -163,3 +163,11 @@ def test_drop_right_while():
 def test_drop_right_while_nil():
     list = ImmutableList.empty()
     assert list.drop_right_while(lambda x: x > 3) == ImmutableList.empty()
+
+
+def test_or_else_nil():
+    assert ImmutableList.empty().or_else(ImmutableList.of(1, 2, 3, 4)) == ImmutableList.of(1, 2, 3, 4)
+
+
+def test_or_else():
+    assert ImmutableList.of(4, 5, 6).or_else(ImmutableList.of(1, 2, 3, 4)) == ImmutableList.of(4, 5, 6)

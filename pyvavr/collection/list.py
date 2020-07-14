@@ -114,13 +114,14 @@ class ImmutableList(ABC, Generic[T]):
     def drop_right_while(self, predicate: Callable[[T], bool]) -> 'ImmutableList[T]':
         return self.reverse().drop_while(predicate).reverse()
 
+    @abstractmethod
+    def or_else(self, list: 'ImmutableList[U]') -> 'ImmutableList[U]':
+        pass
+
     # @abstractmethod
     # def append(self, value: T) -> 'ImmutableList[T]':
     #     pass
     #
-    # @abstractmethod
-    # def or_else(self, list: 'ImmutableList[U]') -> 'ImmutableList[U]':
-    #     pass
     #
     # @abstractmethod
     # def partition(self, predicate: Callable[[T], bool]) -> 'ImmutableList[U]':
@@ -228,6 +229,9 @@ class Cons(ImmutableList, Generic[T]):
             current = current.tail()
         return result
 
+    def or_else(self, list: 'ImmutableList[U]') -> 'ImmutableList[U]':
+        return self
+
 
 class Nil(ImmutableList):
     pass
@@ -258,6 +262,9 @@ class Nil(ImmutableList):
 
     def fold_left(self, zero: U, combine: Callable[[U, T], U]) -> U:
         return zero
+
+    def or_else(self, list: 'ImmutableList[U]') -> 'ImmutableList[U]':
+        return list
 
 
 def _sign(x):
