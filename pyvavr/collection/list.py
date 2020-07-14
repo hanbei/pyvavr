@@ -118,6 +118,45 @@ class ImmutableList(ABC, Generic[T]):
     def or_else(self, list: 'ImmutableList[U]') -> 'ImmutableList[U]':
         pass
 
+    def take(self, n: int) -> 'ImmutableList[T]':
+        if n <= 0:
+            return ImmutableList.empty()
+
+        if n >= len(self):
+            return self
+
+        result = ImmutableList.empty()
+        current = self
+        for i in range(0, n):
+            if current.is_empty():
+                return result
+            result = result.prepend(current.head())
+
+            current = current.tail()
+
+        return result.reverse()
+
+    def take_until(self, predicate: Callable[[T], bool]) -> 'ImmutableList[T]':
+        result = ImmutableList.empty()
+        current = self
+        while not current.is_empty() and not predicate(current.head()):
+            result = result.prepend(current.head())
+            current = current.tail()
+
+        return result.reverse()
+
+    def take_while(self, predicate: Callable[[T], bool]) -> 'ImmutableList[T]':
+        return self.take_until(lambda x: not predicate(x))
+
+    def take_right(self, n: int) -> 'ImmutableList[T]':
+        return self.reverse().take(n).reverse()
+
+    def take_right_until(self, predicate: Callable[[T], bool]) -> 'ImmutableList[T]':
+        return self.reverse().take_until(predicate).reverse()
+
+    def take_right_while(self, predicate: Callable[[T], bool]) -> 'ImmutableList[T]':
+        return self.reverse().take_while(predicate).reverse()
+
     # @abstractmethod
     # def append(self, value: T) -> 'ImmutableList[T]':
     #     pass
@@ -137,30 +176,6 @@ class ImmutableList(ABC, Generic[T]):
     #
     # @abstractmethod
     # def insert(self, index: int, element: T) -> 'ImmutableList[U]':
-    #     pass
-    #
-    # @abstractmethod
-    # def take(self, n: int) -> 'ImmutableList[T]':
-    #     pass
-    #
-    # @abstractmethod
-    # def take_right(self, n: int) -> 'ImmutableList[T]':
-    #     pass
-    #
-    # @abstractmethod
-    # def take_until(self, predicate: Callable[[T], bool]) -> 'ImmutableList[T]':
-    #     pass
-    #
-    # @abstractmethod
-    # def take_until_right(self, predicate: Callable[[T], bool]) -> 'ImmutableList[T]':
-    #     pass
-    #
-    # @abstractmethod
-    # def take_while(self, predicate: Callable[[T], bool]) -> 'ImmutableList[T]':
-    #     pass
-    #
-    # @abstractmethod
-    # def take_while_right(self, predicate: Callable[[T], bool]) -> 'ImmutableList[T]':
     #     pass
     #
     # @abstractmethod
