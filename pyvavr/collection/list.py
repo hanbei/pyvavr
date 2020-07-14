@@ -5,12 +5,13 @@ from pyvavr import ValueException
 
 T = TypeVar("T")  # pragma: no mutate
 U = TypeVar("U")  # pragma: no mutate
+R = TypeVar("R")  # pragma: no mutate
 
 
 class ImmutableList(ABC, Generic[T]):
 
     @staticmethod
-    def of(*values: List[T]) -> 'ImmutableList[T]':
+    def of(*values: T) -> 'ImmutableList[T]':
         result = Nil()
         for value in reversed(values):
             result = result.prepend(value)
@@ -24,9 +25,23 @@ class ImmutableList(ABC, Generic[T]):
             list = list.prepend(x)
         return list
 
+    @staticmethod
+    def of_list(list: List[T]) -> 'ImmutableList[T]':
+        result = Nil()
+        for value in reversed(list):
+            result = result.prepend(value)
+        return result
+
+    @staticmethod
+    def empty():
+        return Nil()
+
     @abstractmethod
     def __len__(self):
         pass
+
+    def __iter__(self):
+        return ImmutableListIterator(self)
 
     @abstractmethod
     def head(self) -> T:
@@ -48,8 +63,112 @@ class ImmutableList(ABC, Generic[T]):
     def is_empty(self) -> bool:
         pass
 
+    @abstractmethod
+    def fold_left(self, zero: U, combine: Callable[[U, T], U]) -> U:
+        pass
+
     def prepend(self, value: T) -> 'ImmutableList[T]':
         return Cons(value, self)
+
+    def peek(self) -> T:
+        return self.head()
+
+    def pop(self) -> 'ImmutableList[T]':
+        return self.tail()
+
+    def push(self, value: T) -> 'ImmutableList[T]':
+        return self.prepend(value)
+
+    def drop(self, n: int) -> 'ImmutableList[T]':
+        if n <= 0:
+            return self
+
+        if n >= len(self):
+            return ImmutableList.empty()
+
+        result = self
+        for i in range(0, n):
+            if result.is_empty():
+                return result
+
+            result = result.tail()
+
+        return result
+
+    def drop_right(self, n: int) -> 'ImmutableList[T]':
+        return self.reverse().drop(n).reverse()
+
+    def drop_until(self, predicate: Callable[[T], bool]) -> 'ImmutableList[T]':
+        return self.drop_while(lambda x: not predicate(x))
+
+    def drop_right_until(self, predicate: Callable[[T], bool]) -> 'ImmutableList[T]':
+        return self.drop_right_while(lambda x: not predicate(x))
+
+    def drop_while(self, predicate: Callable[[T], bool]) -> 'ImmutableList[T]':
+        result = self
+        while not result.is_empty() and predicate(result.head()):
+            result = result.tail()
+
+        return result
+
+    def drop_right_while(self, predicate: Callable[[T], bool]) -> 'ImmutableList[T]':
+        return self.reverse().drop_while(predicate).reverse()
+
+    # @abstractmethod
+    # def append(self, value: T) -> 'ImmutableList[T]':
+    #     pass
+    #
+    # @abstractmethod
+    # def or_else(self, list: 'ImmutableList[U]') -> 'ImmutableList[U]':
+    #     pass
+    #
+    # @abstractmethod
+    # def partition(self, predicate: Callable[[T], bool]) -> 'ImmutableList[U]':
+    #     pass
+    #
+    # @abstractmethod
+    # def filter(self, predicate: Callable[[T], bool]) -> 'ImmutableList[T]':
+    #     pass
+    #
+    # @abstractmethod
+    # def flat_map(self, func: Callable[[T], U]) -> 'ImmutableList[U]':
+    #     pass
+    #
+    # @abstractmethod
+    # def insert(self, index: int, element: T) -> 'ImmutableList[U]':
+    #     pass
+    #
+    # @abstractmethod
+    # def take(self, n: int) -> 'ImmutableList[T]':
+    #     pass
+    #
+    # @abstractmethod
+    # def take_right(self, n: int) -> 'ImmutableList[T]':
+    #     pass
+    #
+    # @abstractmethod
+    # def take_until(self, predicate: Callable[[T], bool]) -> 'ImmutableList[T]':
+    #     pass
+    #
+    # @abstractmethod
+    # def take_until_right(self, predicate: Callable[[T], bool]) -> 'ImmutableList[T]':
+    #     pass
+    #
+    # @abstractmethod
+    # def take_while(self, predicate: Callable[[T], bool]) -> 'ImmutableList[T]':
+    #     pass
+    #
+    # @abstractmethod
+    # def take_while_right(self, predicate: Callable[[T], bool]) -> 'ImmutableList[T]':
+    #     pass
+    #
+    # @abstractmethod
+    # def zip(self, other: 'ImmutableList[U]') -> 'ImmutableList[Tuple[T,U]]':
+    #     pass
+    #
+    # @abstractmethod
+    # def zip_with(self, other: 'ImmutableList[U]', mapper: Callable[[T, U], R]) -> 'ImmutableList[Tuple[T,U]]':
+    #     pass
 
 
 class Cons(ImmutableList, Generic[T]):
@@ -59,11 +178,11 @@ class Cons(ImmutableList, Generic[T]):
         self.next = next
 
     def __len__(self):
-        next = self
+        current = self
         acc = 0
-        while next != Nil():
+        while not current.is_empty():
             acc += 1
-            next = next.next
+            current = current.tail()
         return acc
 
     def __eq__(self, o: object) -> bool:
@@ -78,18 +197,18 @@ class Cons(ImmutableList, Generic[T]):
     def map(self, func: Callable[[T], U]) -> ImmutableList[U]:
         current = self
         list = Nil()
-        while current != Nil():
-            list = list.prepend(func(current.value))
-            current = current.next
+        while not current.is_empty():
+            list = list.prepend(func(current.head()))
+            current = current.tail()
 
         return list.reverse()
 
     def reverse(self) -> ImmutableList[T]:
         current = self
         result = Nil()
-        while current != Nil():
-            result = result.prepend(current.value)
-            current = current.next
+        while not current.is_empty():
+            result = result.prepend(current.head())
+            current = current.tail()
         return result
 
     def head(self) -> T:
@@ -100,6 +219,14 @@ class Cons(ImmutableList, Generic[T]):
 
     def is_empty(self) -> bool:
         return False
+
+    def fold_left(self, zero: U, combine: Callable[[U, T], U]) -> U:
+        current = self
+        result = zero
+        while not current.is_empty():
+            result = combine(result, current.head())
+            current = current.tail()
+        return result
 
 
 class Nil(ImmutableList):
@@ -129,6 +256,9 @@ class Nil(ImmutableList):
     def is_empty(self) -> bool:
         return True
 
+    def fold_left(self, zero: U, combine: Callable[[U, T], U]) -> U:
+        return zero
+
 
 def _sign(x):
     if x > 0:
@@ -139,3 +269,16 @@ def _sign(x):
         return 0
     else:
         return x
+
+
+class ImmutableListIterator(Generic[T]):
+    def __init__(self, immutable_list: ImmutableList[T]):
+        self.immutable_list = immutable_list
+
+    def __next__(self) -> T:
+        if self.immutable_list.is_empty():
+            raise StopIteration()
+
+        current = self.immutable_list.head()
+        self.immutable_list = self.immutable_list.tail()
+        return current
