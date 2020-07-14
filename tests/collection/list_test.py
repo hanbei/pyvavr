@@ -1,4 +1,5 @@
 import pytest
+from pytest import fail
 
 from pyvavr import ValueException
 from pyvavr.collection.list import Nil, Cons, ImmutableList
@@ -24,6 +25,10 @@ def test_non_empty_prepend():
 
 def test_list_of():
     assert ImmutableList.of(1, 2, 3) == Cons(1, Cons(2, Cons(3, Nil())))
+
+
+def test_list_of_list():
+    assert ImmutableList.of_list([1, 2, 3]) == Cons(1, Cons(2, Cons(3, Nil())))
 
 
 def test_reverse():
@@ -63,3 +68,98 @@ def test_head_cons_returns_first_element():
 
 def test_tail_cons_returns_all_but_first():
     assert Cons(1, Cons(2, Nil())).tail() == Cons(2, Nil())
+
+
+def test_fold_left():
+    assert ImmutableList.range(1, 5).fold_left(0, lambda x, y: x + y) == 10
+    assert ImmutableList.range(0, 2000).fold_left(0, lambda x, y: x + y) == 1999000
+
+
+def test_iterator_nil():
+    immutable_list = ImmutableList.empty()
+    for i in immutable_list:
+        fail("Should not reach statement")
+
+
+def test_iterator():
+    immutable_list = ImmutableList.of_list([1, 2, 3, 4, 5, 6])
+    result = []
+    for i in immutable_list:
+        result.append(i)
+
+    assert result == [1, 2, 3, 4, 5, 6]
+
+
+def test_drop_nil():
+    empty = ImmutableList.empty()
+    assert empty.drop(1) == Nil()
+
+
+def test_drop():
+    list = ImmutableList.of(1, 2, 3, 4, 5, 6)
+    assert list.drop(3) == ImmutableList.of(4, 5, 6)
+
+
+def test_drop_less_than_zero():
+    list = ImmutableList.of(1, 2, 3, 4, 5, 6)
+    assert list.drop(-1) == list
+
+
+def test_drop_more_than_len():
+    list = ImmutableList.of(1, 2, 3, 4, 5, 6)
+    assert list.drop(10) == ImmutableList.empty()
+
+
+def test_drop_until():
+    list = ImmutableList.of(1, 2, 3, 4, 5, 6)
+    assert list.drop_until(lambda x: x > 3) == ImmutableList.of(4, 5, 6)
+
+
+def test_drop_until_nil():
+    list = ImmutableList.empty()
+    assert list.drop_until(lambda x: x > 3) == ImmutableList.empty()
+
+
+def test_drop_while():
+    list = ImmutableList.of(1, 2, 3, 4, 5, 6)
+    assert list.drop_while(lambda x: x < 3) == ImmutableList.of(3, 4, 5, 6)
+
+
+def test_drop_while_nil():
+    list = ImmutableList.empty()
+    assert list.drop_while(lambda x: x < 3) == ImmutableList.empty()
+
+
+def test_drop_right():
+    list = ImmutableList.of(1, 2, 3, 4, 5, 6)
+    assert list.drop_right(3) == ImmutableList.of(1, 2, 3)
+
+
+def test_drop_right_less_than_zero():
+    list = ImmutableList.of(1, 2, 3, 4, 5, 6)
+    assert list.drop_right(-1) == list
+
+
+def test_drop_right_more_than_len():
+    list = ImmutableList.of(1, 2, 3, 4, 5, 6)
+    assert list.drop_right(10) == ImmutableList.empty()
+
+
+def test_drop_right_until():
+    list = ImmutableList.of(1, 2, 3, 4, 5, 6)
+    assert list.drop_right_until(lambda x: x <= 3) == ImmutableList.of(1, 2, 3)
+
+
+def test_drop_right_until_nil():
+    list = ImmutableList.empty()
+    assert list.drop_right_until(lambda x: x < 3) == ImmutableList.empty()
+
+
+def test_drop_right_while():
+    list = ImmutableList.of(1, 2, 3, 4, 5, 6)
+    assert list.drop_right_while(lambda x: x > 3) == ImmutableList.of(1, 2, 3)
+
+
+def test_drop_right_while_nil():
+    list = ImmutableList.empty()
+    assert list.drop_right_while(lambda x: x > 3) == ImmutableList.empty()
