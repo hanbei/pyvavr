@@ -171,3 +171,55 @@ def test_or_else_nil():
 
 def test_or_else():
     assert ImmutableList.of(4, 5, 6).or_else(ImmutableList.of(1, 2, 3, 4)) == ImmutableList.of(4, 5, 6)
+
+
+def test_take_nil():
+    assert ImmutableList.empty().take(2) == ImmutableList.empty()
+
+
+def test_take():
+    assert ImmutableList.of(1, 2, 3, 4, 5).take(3) == ImmutableList.of(1, 2, 3)
+
+
+def test_take_less_than_zero():
+    list = ImmutableList.of(1, 2, 3, 4, 5, 6)
+    assert list.take(-1) == ImmutableList.empty()
+
+
+def test_take_more_than_len():
+    list = ImmutableList.of(1, 2, 3, 4, 5, 6)
+    assert list.take(10) == list
+
+
+def test_take_until():
+    assert ImmutableList.of(1, 2, 3, 4, 5, 6).take_until(lambda x: x > 3) == ImmutableList.of(1, 2, 3)
+
+
+def test_take_while():
+    assert ImmutableList.of(1, 2, 3, 4, 5, 6).take_while(lambda x: x <= 3) == ImmutableList.of(1, 2, 3)
+
+
+def test_take_right_nil():
+    assert ImmutableList.empty().take_right(2) == ImmutableList.empty()
+
+
+def test_take_right():
+    assert ImmutableList.of(1, 2, 3, 4, 5).take_right(3) == ImmutableList.of(3, 4, 5)
+
+
+def test_take__right_less_than_zero():
+    list = ImmutableList.of(1, 2, 3, 4, 5, 6)
+    assert list.take_right(-1) == ImmutableList.empty()
+
+
+def test_take_right_more_than_len():
+    list = ImmutableList.of(1, 2, 3, 4, 5, 6)
+    assert list.take_right(10) == list
+
+
+def test_take_right_until():
+    assert ImmutableList.of(1, 2, 3, 4, 5, 6).take_right_until(lambda x: x < 3) == ImmutableList.of(3, 4, 5, 6)
+
+
+def test_take_right_while():
+    assert ImmutableList.of(1, 2, 3, 4, 5, 6).take_right_while(lambda x: x > 3) == ImmutableList.of(4, 5, 6)
