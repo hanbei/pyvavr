@@ -223,3 +223,31 @@ def test_take_right_until():
 
 def test_take_right_while():
     assert ImmutableList.of(1, 2, 3, 4, 5, 6).take_right_while(lambda x: x > 3) == ImmutableList.of(4, 5, 6)
+
+
+def test_filter():
+    assert ImmutableList.of(1, 2, 3, 4, 5, 6).filter(lambda x: x % 2 == 0) == ImmutableList.of(2, 4, 6)
+
+
+def test_filter_nil():
+    assert ImmutableList.empty().filter(lambda x: x % 2 == 0) == ImmutableList.empty()
+
+
+def test_flat_map_nil():
+    assert ImmutableList.empty().flat_map(lambda x: range(0, x)) == ImmutableList.empty()
+
+
+def test_flat_map():
+    assert ImmutableList.of(1, 2, 3).flat_map(lambda x: range(0, x)) == ImmutableList.of(0, 0, 1, 0, 1, 2)
+
+
+def test_zip_with():
+    list_one = ImmutableList.of(1, 2, 3, 4)
+    list_two = ImmutableList.of(4, 3, 2, 1)
+    assert list_one.zip_with(list_two, lambda x, y: x + y) == ImmutableList.of(5, 5, 5, 5)
+
+
+def test_zip():
+    list_one = ImmutableList.of(1, 2, 3, 4)
+    list_two = ImmutableList.of(4, 3, 2, 1)
+    assert list_one.zip(list_two) == ImmutableList.of((1, 4), (2, 3), (3, 2), (4, 1))

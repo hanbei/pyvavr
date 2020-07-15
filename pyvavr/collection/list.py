@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar, List, Callable
+from typing import Generic, TypeVar, List, Callable, Tuple
 
 from pyvavr import ValueException
 
@@ -157,34 +157,59 @@ class ImmutableList(ABC, Generic[T]):
     def take_right_while(self, predicate: Callable[[T], bool]) -> 'ImmutableList[T]':
         return self.reverse().take_while(predicate).reverse()
 
-    # @abstractmethod
-    # def append(self, value: T) -> 'ImmutableList[T]':
-    #     pass
-    #
-    #
-    # @abstractmethod
-    # def partition(self, predicate: Callable[[T], bool]) -> 'ImmutableList[U]':
-    #     pass
-    #
-    # @abstractmethod
-    # def filter(self, predicate: Callable[[T], bool]) -> 'ImmutableList[T]':
-    #     pass
-    #
-    # @abstractmethod
-    # def flat_map(self, func: Callable[[T], U]) -> 'ImmutableList[U]':
-    #     pass
-    #
-    # @abstractmethod
-    # def insert(self, index: int, element: T) -> 'ImmutableList[U]':
-    #     pass
-    #
-    # @abstractmethod
-    # def zip(self, other: 'ImmutableList[U]') -> 'ImmutableList[Tuple[T,U]]':
-    #     pass
-    #
-    # @abstractmethod
-    # def zip_with(self, other: 'ImmutableList[U]', mapper: Callable[[T, U], R]) -> 'ImmutableList[Tuple[T,U]]':
-    #     pass
+    def filter(self, predicate: Callable[[T], bool]) -> 'ImmutableList[T]':
+        result = ImmutableList.empty()
+        current = self
+        while not current.is_empty():
+            if predicate(current.head()):
+                result = result.prepend(current.head())
+            current = current.tail()
+
+        return result.reverse()
+
+    def flat_map(self, func: Callable[[List[T]], U]) -> 'ImmutableList[U]':
+        current = self
+        list = ImmutableList.empty()
+        while not current.is_empty():
+            for value in func(current.head()):
+                list = list.prepend(value)
+            current = current.tail()
+
+        return list.reverse()
+
+    def zip(self, other: 'ImmutableList[U]') -> 'ImmutableList[Tuple[T,U]]':
+        return self.zip_with(other, lambda x, y: (x, y))
+
+    def zip_with(self, other: 'ImmutableList[U]', mapper: Callable[[T, U], R]) -> 'ImmutableList[R]':
+        if len(self) != len(other):
+            raise ValueException("not same length")
+
+        result = ImmutableList.empty()
+        other_iter = iter(other)
+        self_iter = iter(self)
+        while True:
+            try:
+                x = next(self_iter)
+                y = next(other_iter)
+                result = result.prepend(mapper(x, y))
+            except StopIteration:
+                break
+
+        return result.reverse()
+
+
+# @abstractmethod
+# def append(self, value: T) -> 'ImmutableList[T]':
+#     pass
+#
+#
+# @abstractmethod
+# def partition(self, predicate: Callable[[T], bool]) -> 'ImmutableList[U]':
+#     pass
+#
+# @abstractmethod
+# def insert(self, index: int, element: T) -> 'ImmutableList[U]':
+#     pass
 
 
 class Cons(ImmutableList, Generic[T]):
@@ -212,7 +237,7 @@ class Cons(ImmutableList, Generic[T]):
 
     def map(self, func: Callable[[T], U]) -> ImmutableList[U]:
         current = self
-        list = Nil()
+        list = ImmutableList.empty()
         while not current.is_empty():
             list = list.prepend(func(current.head()))
             current = current.tail()
