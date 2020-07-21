@@ -2,3 +2,9 @@ class ValueException(Exception):
 
     def __init__(self, message=None):
         super().__init__(message)
+
+
+class NoSuchElementException(Exception):
+
+    def __init__(self, message=None):
+        super().__init__(message)
